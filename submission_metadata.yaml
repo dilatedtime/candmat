@@ -1,0 +1,63 @@
+# Redrob Hackathon — Submission Metadata
+# Mirrors the portal metadata. Fill team identity fields before submitting.
+
+team_name: "TODO-your-team-name"
+
+primary_contact:
+  name: "TODO"
+  email: "TODO@example.com"
+  phone: "+91-XXXXXXXXXX"
+
+team_members:
+  - name: "TODO"
+    email: "TODO@example.com"
+    role: "ML/Backend Engineer"
+
+# ── Code and reproducibility ────────────────────────────────────────────────
+github_repo: "https://github.com/StarkPrince/candmat"
+sandbox_link: "http://20.219.132.175:8501"
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+
+# ── Compute environment ─────────────────────────────────────────────────────
+compute:
+  platform: "Windows 11, local CPU box"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.13"
+  os: "Windows 11"
+  uses_gpu_for_inference: false        # ranking is CPU-only
+  has_network_during_ranking: false    # no API calls during ranking
+  pre_computation_required: true       # offline embeddings (bge-small) precomputed
+  pre_computation_time_minutes: 15     # approx, embedding 100K candidates on CPU
+
+# ── AI tools declaration (transparency only) ────────────────────────────────
+ai_tools_used:
+  - "Claude"
+ai_usage_summary: |
+  Used Claude (Claude Code) for architecture discussion, code authoring, and
+  review of the ranking pipeline. No candidate data is sent to any hosted LLM
+  during ranking — the ranking step is fully local, CPU-only, and offline. The
+  only model used is a local sentence-transformer (bge-small-en-v1.5) run offline
+  to precompute embeddings.
+
+# ── Approach summary ────────────────────────────────────────────────────────
+methodology_summary: |
+  Offline-heavy / online-light hybrid ranker. A local sentence-transformer
+  (bge-small) embeds the JD and each candidate's career-history substance offline;
+  the shipped rank.py loads those vectors and fuses a semantic-recall score with a
+  structured JD-rubric score (trusted must-have skills, career-history evidence,
+  experience band, product-company/geo/eval-literacy context). Skill trust =
+  endorsements x duration x proficiency, so keyword stuffers earn no credit.
+  Explicit honeypot detection (expert-with-0-months, impossible dates) forces
+  impossible profiles to ~0; a pool-relative availability modifier down-weights
+  stale/low-response candidates. Sort is score-desc then candidate_id-asc. Reasoning
+  strings are built only from real profile fields (no hallucination). The full 100K
+  ranking step runs on CPU with no network in well under 5 minutes.
+
+# ── Declarations ────────────────────────────────────────────────────────────
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true

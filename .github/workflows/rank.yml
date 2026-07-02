@@ -1,0 +1,47 @@
+name: rank-and-validate
+
+# Proves the ranking step reproduces: on every push/PR, run rank.py on a
+# committed candidate fixture (CPU-only, no network) and validate the output
+# against the official spec validator. This is the Stage-3 "code reproduction"
+# guarantee, automated.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rank:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install runtime deps (tiny — no torch/ST at rank time)
+        run: pip install -r requirements.txt
+
+      - name: Run the ranker on the CI fixture (CPU, no network)
+        run: |
+          python rank.py \
+            --candidates data/ci_candidates.jsonl \
+            --out ci_submission.csv
+
+      - name: Validate submission format against the spec
+        run: python validate_submission.py ci_submission.csv
+
+      - name: Trap check (0 honeypots / 0 stuffers in the produced ranking)
+        run: |
+          python tests/trap_check.py \
+            --candidates data/ci_candidates.jsonl \
+            --submission ci_submission.csv
+
+      - name: Upload produced ranking as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-submission
+          path: ci_submission.csv

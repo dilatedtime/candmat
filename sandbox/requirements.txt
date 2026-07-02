@@ -1,0 +1,4 @@
+# Sandbox app deps (the hosted demo). The ranker itself still only needs the
+# root requirements.txt; streamlit is added just for the UI.
+-r ../requirements.txt
+streamlit==1.39.0

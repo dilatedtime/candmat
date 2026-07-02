@@ -1,0 +1,7 @@
+# Offline pre-computation deps (embedding generation). These are heavy and are
+# ONLY required to regenerate artifacts/embeddings.npy from scratch — the shipped
+# rank.py does not import them. Kept out of requirements.txt so the Stage-3
+# reproduction (which uses the committed artifacts) stays lean and fast.
+-r requirements.txt
+sentence-transformers==3.0.1
+torch==2.2.2          # CPU build is fine

@@ -1,0 +1,9 @@
+# ── Runtime deps for the SHIPPED ranking step (rank.py) ──────────────────────
+# Deliberately tiny: rank.py is CPU-only, no-network, and loads precomputed
+# artifacts. No torch / sentence-transformers needed at rank time.
+numpy==1.26.4
+pyyaml==6.0.2
+
+# ── Offline-only deps (precompute/*.py) — NOT needed to reproduce submission.csv
+# from the committed artifacts. Installed separately when regenerating embeddings.
+# See requirements-offline.txt
