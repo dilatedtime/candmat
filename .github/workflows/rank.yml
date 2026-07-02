@@ -45,3 +45,33 @@ jobs:
         with:
           name: ci-submission
           path: ci_submission.csv
+
+  deploy:
+    name: deploy-to-azure-vm
+    runs-on: ubuntu-latest
+    needs: rank
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    environment:
+      name: production
+      url: http://${{ secrets.CANDMAT_VM_HOST }}:8501
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.CANDMAT_VM_SSH_KEY }}" > ~/.ssh/candmat_deploy_key
+          chmod 600 ~/.ssh/candmat_deploy_key
+          ssh-keyscan -H "${{ secrets.CANDMAT_VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload deploy script
+        run: |
+          scp -i ~/.ssh/candmat_deploy_key \
+            scripts/deploy_vm.sh \
+            "${{ secrets.CANDMAT_VM_USER }}@${{ secrets.CANDMAT_VM_HOST }}:/tmp/candmat-deploy.sh"
+
+      - name: Deploy Streamlit sandbox
+        run: |
+          ssh -i ~/.ssh/candmat_deploy_key \
+            "${{ secrets.CANDMAT_VM_USER }}@${{ secrets.CANDMAT_VM_HOST }}" \
+            "REPO_URL='https://github.com/dilatedtime/candmat.git' BRANCH='main' bash /tmp/candmat-deploy.sh"
