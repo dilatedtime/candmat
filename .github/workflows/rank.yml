@@ -53,7 +53,6 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     environment:
       name: production
-      url: http://${{ secrets.CANDMAT_VM_HOST }}:8501
     steps:
       - uses: actions/checkout@v4
 
